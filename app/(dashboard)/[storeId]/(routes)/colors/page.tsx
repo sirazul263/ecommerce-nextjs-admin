@@ -1,33 +1,35 @@
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
-import { BillboardClient } from "./components/client";
+import { ColorClient } from "./components/client";
 import prismadb from "@/lib/prismadb";
-import { BillboardColumn } from "./components/columns";
-import { format } from "date-fns";
 
-const BillboardsPage = async ({ params }: { params: { storeId: string } }) => {
+import { format } from "date-fns";
+import { ColorColumn } from "./components/columns";
+
+const ColorsPage = async ({ params }: { params: { storeId: string } }) => {
   const { userId } = auth();
   if (!userId) {
     redirect("/sign-in");
   }
-  const billboards = await prismadb.billboard.findMany({
+  const colors = await prismadb.color.findMany({
     where: { storeId: params.storeId },
     orderBy: { createdAt: "desc" },
   });
 
-  const formattedBillboards: BillboardColumn[] = billboards.map((item) => ({
+  const formattedSizes: ColorColumn[] = colors.map((item) => ({
     id: item.id,
-    label: item.label,
+    name: item.name,
+    value: item.value,
     createdAt: format(item.createdAt, "MMMM do, yyyy"),
   }));
 
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
-        <BillboardClient data={formattedBillboards} />
+        <ColorClient data={formattedSizes} />
       </div>
     </div>
   );
 };
 
-export default BillboardsPage;
+export default ColorsPage;
